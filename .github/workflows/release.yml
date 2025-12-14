@@ -30,7 +30,7 @@ jobs:
         run: npm run package
 
       - name: Package VSIX
-        run: npx vsce package --no-dependencies --out $VSIX_NAME
+        run: npx vsce package --out $VSIX_NAME
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
