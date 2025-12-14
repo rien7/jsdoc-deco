@@ -57,8 +57,8 @@ function init(modules: { typescript: typeof ts }) {
         // 没有文档时不覆盖原始 quickInfo
         if (!docText) return quickInfo
 
-        const PREFIX = '​​'
-        const SUFFIX = '​​'
+        const PREFIX = '\u200b\u200b'
+        const SUFFIX = '\u200b\u200b'
         quickInfo.documentation = [{ kind: 'text', text: `${PREFIX}${docText}${SUFFIX}` }]
 
       } catch {

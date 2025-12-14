@@ -112,11 +112,13 @@ async function refreshDecorations(editor: vscode.TextEditor) {
 		clearDecorations(editor)
 		return
 	}
+
 	const visibleAccesses = filterVisiblePropertyAccesses(editor, allAccesses)
+	const fetchTargets = buildFetchTargets(visibleAccesses, allAccesses, cache)
 
 	await buildDecorationsWithConcurrency(
 		document,
-		visibleAccesses,
+		fetchTargets,
 		currentId,
 		version,
 		cache
@@ -220,6 +222,29 @@ async function fetchDocumentation(
 	if (!body) return null
 	const text = extractDocumentation(body)
 	return text || null
+}
+
+function buildFetchTargets(
+	visible: ReturnType<typeof scanPropertyAccesses>,
+	all: ReturnType<typeof scanPropertyAccesses>,
+	cache: { version: number; map: Map<number, string> }
+) {
+	if (!visible || visible.length === 0) {
+		return all
+	}
+	const seen = new Set<number>()
+	const targets: typeof visible = []
+	const pushIf = (list: ReturnType<typeof scanPropertyAccesses>) => {
+		for (const item of list) {
+			if (seen.has(item.offset)) continue
+			seen.add(item.offset)
+			if (cache.map.has(item.offset)) continue
+			targets.push(item)
+		}
+	}
+	pushIf(visible)
+	pushIf(all)
+	return targets
 }
 
 function pruneCache(

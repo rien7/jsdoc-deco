@@ -4,6 +4,8 @@ import * as vscode from 'vscode'
 const SUPPORTED_LANGUAGES = new Set([
 	'typescript', 'typescriptreact'
 ])
+const DOC_PREFIX = '\u200b\u200b'
+const DOC_SUFFIX = '\u200b\u200b'
 export function isSupportedDocument(document: vscode.TextDocument): boolean {
   const ok = SUPPORTED_LANGUAGES.has(document.languageId)
   return ok
@@ -51,11 +53,9 @@ export function extractDocumentation(body: QuickInfoResponse['body'] | undefined
     .join('')
     .trim()
 
-  const PREFIX = '​​'
-  const SUFFIX = '​​'
-  if (!text.startsWith(PREFIX) || !text.endsWith(SUFFIX)) {
+  if (!text.startsWith(DOC_PREFIX) || !text.endsWith(DOC_SUFFIX)) {
     return ''
   }
 
-  return text.slice(PREFIX.length, text.length - SUFFIX.length).trim()
+  return text.slice(DOC_PREFIX.length, text.length - DOC_SUFFIX.length).trim()
 }
