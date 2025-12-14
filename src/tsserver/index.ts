@@ -6,6 +6,7 @@ function init(modules: { typescript: typeof ts }) {
   function create(info: ts.server.PluginCreateInfo): ts.LanguageService {
     const logger = info.project.projectService.logger
     const dbg = (msg: string) => logger.info(`[jsdoc-deco-ts] ${msg}`)
+    dbg('tsserver plugin initialized')
     const base = info.languageService
     const proxy = copyLanguageService(base)
 
@@ -38,10 +39,7 @@ function init(modules: { typescript: typeof ts }) {
         const start = tsModule.getLineAndCharacterOfPosition(sourceFile, propAccess.name.getStart())
         dbg(`quickinfo file=${fileName} pos=${start.line + 1}:${start.character + 1} name=${propAccess.name.getText()} decls=${declPaths.join(',')}`)
 
-        const isFromLib = memberDecls.some((d) => {
-          const file = d.getSourceFile().fileName
-          return file.includes('/typescript/lib/') || file.includes('\\typescript\\lib\\')
-        })
+        const isFromLib = memberDecls.some((d) => isFromLibFile(program, d.getSourceFile()))
         dbg(`isFromLib=${isFromLib}`)
         if (isFromLib) { return quickInfo }
 
@@ -61,7 +59,8 @@ function init(modules: { typescript: typeof ts }) {
         const SUFFIX = '\u200b\u200b'
         quickInfo.documentation = [{ kind: 'text', text: `${PREFIX}${docText}${SUFFIX}` }]
 
-      } catch {
+      } catch (err) {
+        dbg(`quickinfo error=${err instanceof Error ? err.message : String(err)}`)
         return undefined
       }
 
@@ -111,12 +110,32 @@ function isConstObjectLiteralDecl(tsModule: typeof ts, decl: ts.Declaration): bo
         && (list.flags & tsModule.NodeFlags.Const) !== 0) {
           const init = current.initializer
           const obj = unwrapToObjectLiteral(tsModule, init)
-          return obj !== undefined
+          if (!obj) { return false }
+          const declFile = decl.getSourceFile()
+          const declStart = decl.getStart()
+          const declEnd = decl.getEnd()
+          // 仅当声明处于 const 对象字面量内部时才算匹配
+          if (
+            declFile === obj.getSourceFile()
+            && declStart >= obj.getStart()
+            && declEnd <= obj.getEnd()
+          ) {
+            return true
+          }
+          return false
       }
     }
     current = current.parent
   }
   return false
+}
+
+function isFromLibFile(program: ts.Program, sourceFile: ts.SourceFile): boolean {
+  if (program.isSourceFileDefaultLibrary(sourceFile) || program.isSourceFileFromExternalLibrary(sourceFile)) {
+    return true
+  }
+  const file = sourceFile.fileName
+  return file.includes('/typescript/lib/') || file.includes('\\typescript\\lib\\')
 }
 
 function unwrapToObjectLiteral(tsModule: typeof ts, expr: ts.Expression | undefined): ts.ObjectLiteralExpression | undefined {

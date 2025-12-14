@@ -45,13 +45,10 @@ export function extractDocumentation(body: QuickInfoResponse['body'] | undefined
   }
 
   const { documentation } = body
-  if (typeof documentation === 'string') {
-    return documentation.trim()
-  }
-  const text = documentation
-    .map((part) => part.text)
-    .join('')
-    .trim()
+  const text = (typeof documentation === 'string'
+    ? documentation
+    : documentation.map((part) => part.text).join('')
+  ).trim()
 
   if (!text.startsWith(DOC_PREFIX) || !text.endsWith(DOC_SUFFIX)) {
     return ''
