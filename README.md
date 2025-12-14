@@ -1,71 +1,26 @@
-# jsdoc-deco README
+# jsdoc-deco
 
-This is the README for your extension "jsdoc-deco". After writing up a brief description, we recommend including the following sections.
+Inline JSDoc decorations for property accesses on `as const` object literals in TypeScript/TSX files. Keeps docs visible next to the code without opening hovers.
 
 ## Features
+- Shows JSDoc from `const obj = { /**doc*/ key: ... } as const` when you access `obj.key`.
+- Decorations are cached and kept even when scrolled out of view; only the visible region triggers new tsserver requests.
+- Bundled tsserver plugin and extension build via esbuild; activation enforces the semantic TypeScript server so the plugin always loads.
+- Skips built-in lib symbols and drops stale cache entries when no documentation is returned.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## Usage
+Open a TypeScript/TSX file and reference a property from a `const` object literal. The JSDoc for that property will appear inline after the property access while you edit, switch editors, or scroll.
 
-For example if there is an image subfolder under your extension project workspace:
+## Requirements / Notes
+- Uses the bundled tsserver plugin; VS Code’s TypeScript extension must be enabled.
+- The extension sets `typescript.tsserver.useSyntaxServer` to `never` in the workspace to ensure the semantic server (and plugin) run.
+- Only TypeScript/TSX files are supported; other languages are ignored.
 
-\!\[feature X\]\(images/feature-x.png\)
+## Development
+- Build once: `node esbuild.js`
+- Watch: `node esbuild.js --watch`
+- Run extension: F5 with “Run Extension” launch config.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+## Known limitations
+- Only `const` object literal properties are decorated; other symbol kinds are left untouched.
+- If TypeScript server logs show the plugin not loading, reload the window or restart TS Server.

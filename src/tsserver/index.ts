@@ -4,6 +4,8 @@ function init(modules: { typescript: typeof ts }) {
   const tsModule = modules.typescript
 
   function create(info: ts.server.PluginCreateInfo): ts.LanguageService {
+    const logger = info.project.projectService.logger
+    const dbg = (msg: string) => logger.info(`[jsdoc-deco-ts] ${msg}`)
     const base = info.languageService
     const proxy = copyLanguageService(base)
 
@@ -32,11 +34,20 @@ function init(modules: { typescript: typeof ts }) {
         if (!memberSymbol) { return quickInfo }
 
         const memberDecls = memberSymbol.getDeclarations() ?? []
-        const isFromConstObject = memberDecls.some((decl) => isConstObjectLiteralDecl(tsModule, decl))
-        if (!isFromConstObject) { return quickInfo }
+        const declPaths = memberDecls.map((d) => d.getSourceFile().fileName)
+        const start = tsModule.getLineAndCharacterOfPosition(sourceFile, propAccess.name.getStart())
+        dbg(`quickinfo file=${fileName} pos=${start.line + 1}:${start.character + 1} name=${propAccess.name.getText()} decls=${declPaths.join(',')}`)
 
-        const isFromLib = memberSymbol.getDeclarations()?.some((d) => d.getSourceFile().fileName.includes("typescript/lib/"))
+        const isFromLib = memberDecls.some((d) => {
+          const file = d.getSourceFile().fileName
+          return file.includes('/typescript/lib/') || file.includes('\\typescript\\lib\\')
+        })
+        dbg(`isFromLib=${isFromLib}`)
         if (isFromLib) { return quickInfo }
+
+        const isFromConstObject = memberDecls.some((decl) => isConstObjectLiteralDecl(tsModule, decl))
+        dbg(`isFromConstObject=${isFromConstObject}`)
+        if (!isFromConstObject) { return quickInfo }
 
         const docParts = memberSymbol.getDocumentationComment(checker)
         const docText = docParts
@@ -46,8 +57,9 @@ function init(modules: { typescript: typeof ts }) {
         // 没有文档时不覆盖原始 quickInfo
         if (!docText) return quickInfo
 
-        const PREFIX = '​'
-        quickInfo.documentation = [{ kind: 'text', text: `${PREFIX}${docText}` }]
+        const PREFIX = '​​'
+        const SUFFIX = '​​'
+        quickInfo.documentation = [{ kind: 'text', text: `${PREFIX}${docText}${SUFFIX}` }]
 
       } catch {
         return undefined
@@ -129,5 +141,4 @@ function unwrapToObjectLiteral(tsModule: typeof ts, expr: ts.Expression | undefi
   }
   return undefined
 }
-
 export = init

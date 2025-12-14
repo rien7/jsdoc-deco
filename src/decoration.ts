@@ -15,5 +15,5 @@ export function applyDecorations(editor: vscode.TextEditor, decorationOptions: v
 }
 
 export function disposeDecorations(): void {
-  decorationType.dispose();
+  decorationType.dispose()
 }
