@@ -1,0 +1,8 @@
+{
+  "name": "vscode-jsdoc-inline-deco-tsserver-plugin",
+  "version": "0.0.1",
+  "main": "./index.js",
+  "dependencies": {
+    "typescript": "^5.9.3"
+  }
+}
