@@ -1,11 +1,12 @@
 {
   "name": "jsdoc-deco",
   "displayName": "jsdoc-deco",
-  "description": "",
-  "version": "0.0.4",
+  "description": "Inline JSDoc decorations for `as const` object property accesses in TypeScript/TSX.",
+  "version": "0.0.5",
   "engines": {
     "vscode": "^1.107.0"
   },
+  "publisher": "rien7",
   "author": {
     "name": "RieN7",
     "email": "zrien7@gmail.com",
