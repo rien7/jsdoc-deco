@@ -21,6 +21,9 @@ Open a TypeScript/TSX file and reference a property from a `const` object litera
 - Watch: `node esbuild.js --watch`
 - Run extension: F5 with “Run Extension” launch config.
 
+## CI / Release
+- Tag pushes trigger GitHub Actions to build the VSIX with `vsce` and attach it to the GitHub release automatically.
+
 ## Known limitations
 - Only `const` object literal properties are decorated; other symbol kinds are left untouched.
 - If TypeScript server logs show the plugin not loading, reload the window or restart TS Server.

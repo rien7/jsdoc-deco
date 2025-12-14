@@ -13,3 +13,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Refresh visible-range decorations on scroll while retaining existing decorations off-screen.
 - Clear stale cache entries when requests return no documentation (e.g., lib symbols) to avoid reusing old tooltips.
 - Remove debug logging and rely on the tsserver plugin for const-object docs only (no extra JSDoc fallback).
+- Add GitHub Actions workflow to build a VSIX on tag pushes and attach it to the GitHub release.
